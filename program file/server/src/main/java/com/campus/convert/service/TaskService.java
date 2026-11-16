@@ -38,6 +38,11 @@ public interface TaskService {
 
     FileRecord resolveResultFile(Long taskId);
 
+    /**
+     * 使用一次性下载令牌解析产物（无需登录态，令牌绑定用户与产物）。
+     */
+    FileRecord resolveResultFileByToken(Long taskId, String token);
+
     TaskResponse toResponse(ConvertTask task);
 
     /**

@@ -34,7 +34,7 @@ campus:
   storage:
     type: ${CAMPUS_STORAGE_TYPE:local}
     local-path: ${CAMPUS_STORAGE_LOCAL_PATH:./upload/files}
-    download-token-ttl-minutes: 10
+    download-token-ttl-minutes: ${CAMPUS_STORAGE_DOWNLOAD_TOKEN_TTL_MINUTES:10}
   engine:
     ffmpeg-path: ${CAMPUS_ENGINE_FFMPEG_PATH:ffmpeg}
     libreoffice-path: ${CAMPUS_ENGINE_LIBREOFFICE_PATH:soffice}
@@ -68,6 +68,11 @@ campus:
     max-file-size: ${CAMPUS_QUOTA_MAX_FILE_SIZE:200MB}
   task:
     max-retry: ${CAMPUS_TASK_MAX_RETRY:3}
+  rate-limit:
+    login-per-minute: ${CAMPUS_RATE_LIMIT_LOGIN:10}
+    register-per-minute: ${CAMPUS_RATE_LIMIT_REGISTER:5}
+    upload-per-minute: ${CAMPUS_RATE_LIMIT_UPLOAD:20}
+    task-create-per-minute: ${CAMPUS_RATE_LIMIT_TASK_CREATE:30}
   file:
     expire-days: 7
     allowed-extensions: >-

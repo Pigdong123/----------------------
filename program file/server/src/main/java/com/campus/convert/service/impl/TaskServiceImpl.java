@@ -313,6 +313,27 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public FileRecord resolveResultFileByToken(Long taskId, String token) {
+        JwtUtil.DownloadToken claims = jwtUtil.parseDownloadToken(token);
+        ConvertTask task = getEntity(taskId);
+        if (!claims.userId().equals(task.getUserId())
+                || task.getResultFileId() == null
+                || !claims.fileId().equals(task.getResultFileId())) {
+            throw new BizException(ResultCode.DOWNLOAD_FORBIDDEN, "下载令牌与任务不匹配");
+        }
+        boolean downloadable = TaskStatusEnum.SUCCESS.name().equals(task.getStatus())
+                || TaskStatusEnum.DOWNLOADED.name().equals(task.getStatus());
+        if (!downloadable) {
+            throw new BizException(ResultCode.TASK_STATUS_INVALID, "任务尚未完成，无法下载");
+        }
+        FileRecord record = fileRecordMapper.selectById(task.getResultFileId());
+        if (record == null) {
+            throw new BizException(ResultCode.NOT_FOUND, "产物文件不存在或已被清理");
+        }
+        return record;
+    }
+
+    @Override
     public TaskResponse toResponse(ConvertTask task) {
         TaskResponse response = new TaskResponse();
         response.setId(task.getId());
