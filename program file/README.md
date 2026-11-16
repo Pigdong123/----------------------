@@ -125,9 +125,12 @@ docker compose up -d --build
 
 ```bash
 # 1. 初始化数据库（新库）
-mysql -u root -p < deploy/schema.sql
+mysql -u root -p campus_convert < deploy/schema.sql
 # 已有库：执行增量迁移
 mysql -u root -p campus_convert < deploy/schema-v2-multiformat-feedback.sql
+
+# Windows PowerShell 不支持 `<` 输入重定向，可改用：
+# Get-Content deploy/schema.sql | mysql -u root -p campus_convert
 
 # 2. 后端（默认 dev profile，连接 localhost:3306 / 6379）
 cd server
@@ -176,7 +179,7 @@ cd web
 npm run build            # 生成 dist/
 ```
 
-当前单元测试覆盖：任务状态机、引擎支持判定、JSON 参数解析、文件魔数识别、字幕互转、NCM 解密、JWT 下载令牌。
+当前 **21 项**单元测试，覆盖任务状态机、引擎支持判定、JSON 参数解析、文件魔数识别、字幕互转、NCM 解密、JWT 下载令牌。
 
 ## 角色与权限
 
