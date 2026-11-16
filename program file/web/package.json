@@ -1,0 +1,23 @@
+{
+  "name": "campus-format-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "校园课程资源格式适配与转换服务系统 - 前端",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "element-plus": "^2.7.5",
+    "pinia": "^2.1.7",
+    "vue": "^3.4.27",
+    "vue-router": "^4.3.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.4",
+    "vite": "^5.2.11"
+  }
+}

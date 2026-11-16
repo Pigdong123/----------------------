@@ -1,0 +1,35 @@
+# ---------- 操作系统 / IDE ----------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+*.iml
+.vscode/
+
+# ---------- 构建产物 ----------
+program file/server/target/
+program file/web/node_modules/
+program file/web/dist/
+*.class
+*.log
+
+# ---------- 运行时数据 ----------
+program file/server/upload/
+program file/server/logs/
+upload/
+logs/
+*.pid
+
+# ---------- 本地环境与密钥（模板除外） ----------
+.env
+program file/deploy/.env
+application-local.yml
+
+# ---------- 离线引擎安装包（仅根目录，数百 MB，不入库） ----------
+/engine/
+
+# ---------- 自动生成的预览/临时文件 ----------
+.preview/
+~$*.docx
+~$*.pptx
+~$*.xlsx

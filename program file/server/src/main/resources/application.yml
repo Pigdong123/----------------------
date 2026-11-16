@@ -1,0 +1,83 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: campus-format-server
+  profiles:
+    active: dev
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+  servlet:
+    multipart:
+      max-file-size: 200MB
+      max-request-size: 200MB
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+campus:
+  jwt:
+    secret: ${CAMPUS_JWT_SECRET:change-me-to-a-long-random-string}
+    ttl-hours: ${CAMPUS_JWT_TTL_HOURS:12}
+  storage:
+    type: ${CAMPUS_STORAGE_TYPE:local}
+    local-path: ${CAMPUS_STORAGE_LOCAL_PATH:./upload/files}
+    download-token-ttl-minutes: 10
+  engine:
+    ffmpeg-path: ${CAMPUS_ENGINE_FFMPEG_PATH:ffmpeg}
+    libreoffice-path: ${CAMPUS_ENGINE_LIBREOFFICE_PATH:soffice}
+    pandoc-path: ${CAMPUS_ENGINE_PANDOC_PATH:pandoc}
+    imagemagick-path: ${CAMPUS_ENGINE_IMAGEMAGICK_PATH:convert}
+    caj2pdf-path: ${CAMPUS_ENGINE_CAJ2PDF_PATH:caj2pdf}
+    ddjvu-path: ${CAMPUS_ENGINE_DDJVU_PATH:ddjvu}
+    pages-command: ${CAMPUS_ENGINE_PAGES_COMMAND:}
+    tesseract-path: ${CAMPUS_ENGINE_TESSERACT_PATH:tesseract}
+    tesseract-lang: ${CAMPUS_ENGINE_TESSERACT_LANG:chi_sim+eng}
+    pix2tex-path: ${CAMPUS_ENGINE_PIX2TEX_PATH:pix2tex}
+    task-timeout-minutes: 30
+    max-concurrent-tasks: 4
+    poll-interval-ms: ${CAMPUS_ENGINE_POLL_INTERVAL_MS:2000}
+    qc:
+      provider: ${CAMPUS_ENGINE_QC_PROVIDER:rule}
+  queue:
+    provider: ${CAMPUS_QUEUE_PROVIDER:redis}
+    redis-key: campus:task:queue
+    max-dispatch-per-poll: 4
+  ai:
+    enabled: ${CAMPUS_AI_ENABLED:true}
+    provider: ${CAMPUS_AI_PROVIDER:rule}
+    llm:
+      base-url: ${CAMPUS_AI_LLM_BASE_URL:}
+      api-key: ${CAMPUS_AI_LLM_API_KEY:}
+      model: ${CAMPUS_AI_LLM_MODEL:}
+  quota:
+    default-daily-limit: ${CAMPUS_QUOTA_DAILY_LIMIT:20}
+    default-storage-limit: ${CAMPUS_QUOTA_STORAGE_LIMIT:1GB}
+    max-file-size: ${CAMPUS_QUOTA_MAX_FILE_SIZE:200MB}
+  task:
+    max-retry: ${CAMPUS_TASK_MAX_RETRY:3}
+  file:
+    expire-days: 7
+    allowed-extensions: >-
+      doc,docx,ppt,pptx,pdf,pages,caj,djvu,djv,
+      flac,wav,m4a,mp3,ogg,ncm,
+      png,jpg,jpeg,heic,heif,webp,bmp,tiff,
+      m4s,mov,hevc,mkv,avi,mp4,
+      srt,vtt,ass,ssa
+
+logging:
+  level:
+    com.campus.convert: debug
+    org.springframework.security: info

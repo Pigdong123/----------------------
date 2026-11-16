@@ -1,0 +1,55 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: campus-format-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+
+  redis:
+    image: redis:7-alpine
+    container_name: campus-format-redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  app:
+    build: ../server
+    container_name: campus-format-app
+    env_file: .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - file_storage:/data/campus-format/files
+
+  web:
+    build: ../web
+    container_name: campus-format-web
+    ports:
+      - "80:80"
+    depends_on:
+      - app
+
+  # 可选：后续接入 MinIO 替代本地存储
+  # minio:
+  #   image: minio/minio
+  #   command: server /data --console-address ":9001"
+  #   ports: ["9000:9000", "9001:9001"]
+  #   volumes: [minio_data:/data]
+
+volumes:
+  mysql_data:
+  redis_data:
+  file_storage:
+  # minio_data:
