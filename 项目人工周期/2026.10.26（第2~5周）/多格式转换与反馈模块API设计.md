@@ -26,9 +26,10 @@
 | 1001 | 今日配额已用尽 |
 | 1002 | 文件过大 |
 | 1003 | 格式不支持 |
+| 1006 | 下载被拒绝（令牌无效/已使用/不匹配） |
 | 1008 | 任务状态非法 |
 | 1010 | 存储空间不足 |
-| 1011 | 请求过于频繁（预留） |
+| 1011 | 请求过于频繁（HTTP 429） |
 
 ---
 
@@ -137,6 +138,38 @@ campus.engine:
   pix2tex-path: pix2tex
   task-timeout-minutes: 30
 ```
+
+### 2.7 下载转换结果
+
+`GET /api/tasks/{id}/download`
+
+支持两种方式：
+
+1. **登录态**：`Authorization: Bearer <JWT>`，并校验任务归属；
+2. **一次性下载令牌**：`GET /api/tasks/{id}/download?token=<downloadToken>`，无需登录。
+
+任务详情 `GET /api/tasks/{id}` 在状态为 `SUCCESS/DOWNLOADED` 时返回 `downloadToken`（默认 10 分钟有效）。令牌绑定用户与产物文件，且 **只能使用一次**：
+
+- 二次使用 → `code=1006`；
+- 令牌与任务/产物不匹配 → `code=1006`；
+- 令牌过期/签名无效 → `code=401`。
+
+### 2.8 接口限流
+
+| 接口 | 默认阈值（每分钟） | 维度 |
+|---|---|---|
+| `POST /auth/login` | 10 | IP |
+| `POST /auth/register` | 5 | IP |
+| `POST /files` | 20 | 用户（未登录为 IP） |
+| `POST /tasks` | 30 | 用户（未登录为 IP） |
+
+超限返回 **HTTP 429**，响应体：
+
+```json
+{ "code": 1011, "message": "操作过于频繁，请稍后再试", "data": null }
+```
+
+阈值可通过 `campus.rate-limit.*` / `CAMPUS_RATE_LIMIT_*` 调整；Redis 不可用时限流自动放行，不阻断核心转换。
 
 ---
 
