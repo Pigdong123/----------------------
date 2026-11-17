@@ -119,6 +119,8 @@ docker compose up -d --build
 
 首次访问请先注册；**系统第一个注册用户自动成为 `SYS_ADMIN`**，可用其配置角色、模板与配额。
 
+> MySQL 与 Redis 仅在同一 Docker 网络内互通，不映射宿主机端口（避免 Windows 保留端口冲突）；如需调试，可临时在 `docker-compose.yml` 中增加端口映射。
+
 ### 方式二：本地开发
 
 前置条件：JDK 17、Maven 3.9+、Node 18+、MySQL 8、Redis 7；如需真实转换，安装 ffmpeg / LibreOffice / ImageMagick（Windows 下 ImageMagick 使用 `magick`）。
@@ -177,9 +179,17 @@ mvn -DskipTests package  # 生成 target/campus-format-server.jar
 # 前端
 cd web
 npm run build            # 生成 dist/
+
+# 端到端（需 Compose 已启动）
+cd ../deploy
+python smoke-test.py --base-url http://localhost:8080/api --check-rate-limit
+python extended-smoke.py
+python stability-test.py
 ```
 
 当前 **21 项**单元测试，覆盖任务状态机、引擎支持判定、JSON 参数解析、文件魔数识别、字幕互转、NCM 解密、JWT 下载令牌。
+
+2026-11-17 在 Docker Compose 环境实测：基础链路 11/11、扩展引擎 8/8、并发与负向 7/7，详见 `端到端冒烟记录.md`。
 
 ## 角色与权限
 
@@ -199,9 +209,10 @@ npm run build            # 生成 dist/
 
 ## 已知边界与后续规划
 
+- **Docker Compose 端到端已实测通过**（基础 11/11、扩展 8/8、并发 7/7，见 `端到端冒烟记录.md`）。
 - MinIO 存储仍为接入点（`MinioStorageServiceImpl` 占位），当前使用本地存储。
 - 尚未引入 Flyway/Liquibase，数据库变更通过 `schema*.sql` 手工执行。
-- 集成/并发测试、前端组件测试、CI/CD 尚未落地。
+- Testcontainers 集成测试、前端组件测试、CI/CD 尚未落地（已有三组可复现的端到端脚本）。
 - 实时进度当前为前端轮询，后续可升级 SSE/WebSocket。
 - 多端（Windows/iOS/HarmonyOS/Kylin）与多 AI 提供方 SPI 为后续演进方向。
 
@@ -210,11 +221,14 @@ npm run build            # 生成 dist/
 - `项目人工周期/2026.10.26（第2~5周）/2026.10.27项目中期分析.md`：中期审计与修复记录
 - `项目人工周期/2026.10.26（第2~5周）/后续项目工作流设计.md`：六阶段演进路线
 - `项目人工周期/2026.10.26（第2~5周）/多格式转换与反馈模块API设计.md`：多格式与反馈接口契约
-- `项目人工周期/2026.10.26（第2~5周）/端到端冒烟记录.md`：冒烟脚本与执行结果
+- `项目人工周期/2026.10.26（第2~5周）/端到端冒烟记录.md`：三组冒烟脚本与实测结果
+- `项目人工周期/2026.10.26（第2~5周）/项目完整性-稳定性-可用性报告.md`：结项三维度评估报告
 - `项目人工周期/2026.10.26（第2~5周）/结项验收清单.md`：P0/P1 完成度对照
 - `项目人工周期/2026.10.26（第2~5周）/调研数据模板.md`：问卷采集与统计模板
 - `项目人工周期/2026.10.26（第2~5周）/演示脚本.md`：5 分钟现场演示流程与预案
 - `项目人工周期/2026.10.26（第2~5周）/PPT逐页讲稿.md`：17 页讲稿与 Q&A 预案
 - `项目人工周期/2026.10.26（第2~5周）/校园课程资源格式适配与转换服务系统-结项汇报.pptx`：结项答辩 PPT
-- `program file/deploy/smoke-test.py`：端到端冒烟脚本（Python 标准库）
+- `program file/deploy/smoke-test.py`：基础端到端冒烟脚本（Python 标准库）
+- `program file/deploy/extended-smoke.py`：能力目录与图片/文档/字幕引擎验证
+- `program file/deploy/stability-test.py`：并发与负向测试
 - `program file/deploy/demo-sample.srt`：现场演示样例文件
