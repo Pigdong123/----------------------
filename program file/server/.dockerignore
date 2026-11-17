@@ -1,5 +1,8 @@
-target/
+target/*
 *.jar
 *.log
 upload/
 temp/
+
+# Dockerfile 需要预先构建的可执行 jar
+!target/campus-format-server.jar

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -51,9 +52,11 @@ public class FormatCatalogService {
     }
 
     public List<FormatOption> listAll() {
+        // 同一次目录请求内缓存健康检查结果，避免对每个模板重复启动外部进程
+        Map<ConversionEngine, Boolean> healthCache = new IdentityHashMap<>();
         return formatTemplateService.listAll().stream()
                 .filter(t -> t.getEnabled() != null && t.getEnabled() == 1)
-                .map(this::toOption)
+                .map(t -> toOption(t, healthCache))
                 .filter(Objects::nonNull)
                 .sorted(Comparator.comparing(FormatOption::getCategory)
                         .thenComparing(FormatOption::getSourceExt)
@@ -68,7 +71,7 @@ public class FormatCatalogService {
                 .toList();
     }
 
-    private FormatOption toOption(FormatTemplate template) {
+    private FormatOption toOption(FormatTemplate template, Map<ConversionEngine, Boolean> healthCache) {
         EngineType type;
         try {
             type = EngineType.fromCode(template.getEngine());
@@ -81,9 +84,11 @@ public class FormatCatalogService {
         option.setEngine(type.getCode());
         option.setCategory(category(type, option.getSourceExt()));
         option.setParamsSchema(parseSchema(template.getParamsSchema()));
+        // 可用 = 引擎支持该格式组合 且 健康检查通过（可选引擎缺少外部工具时标记不可用）
         option.setAvailable(engines.stream().anyMatch(engine ->
                 engine.getType() == type
-                        && engine.supports(option.getSourceExt(), option.getTargetExt())));
+                        && engine.supports(option.getSourceExt(), option.getTargetExt())
+                        && healthCache.computeIfAbsent(engine, ConversionEngine::healthCheck)));
         return option;
     }
 

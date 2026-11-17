@@ -5,8 +5,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
-    ports:
-      - "3306:3306"
+    # 仅容器内互通，不暴露宿主机端口（避免 Windows 保留端口冲突）
     volumes:
       - mysql_data:/var/lib/mysql
       - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
@@ -16,8 +15,7 @@ services:
     image: redis:7-alpine
     container_name: campus-format-redis
     command: redis-server --appendonly yes
-    ports:
-      - "6379:6379"
+    # 仅容器内互通，不暴露宿主机端口
     volumes:
       - redis_data:/data
 

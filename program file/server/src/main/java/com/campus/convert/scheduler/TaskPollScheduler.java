@@ -27,13 +27,18 @@ public class TaskPollScheduler {
 
     @Scheduled(fixedDelayString = "${campus.engine.poll-interval-ms:2000}")
     public void poll() {
-        long queued = taskQueue.queuedCount();
-        if (queued <= 0) {
-            return;
-        }
-        int dispatch = (int) Math.min(queued, maxDispatchPerPoll);
-        for (int i = 0; i < dispatch; i++) {
-            taskDispatcher.dispatch();
+        try {
+            long queued = taskQueue.queuedCount();
+            if (queued <= 0) {
+                return;
+            }
+            int dispatch = (int) Math.min(queued, maxDispatchPerPoll);
+            for (int i = 0; i < dispatch; i++) {
+                taskDispatcher.dispatch();
+            }
+        } catch (Exception e) {
+            // 队列/Redis 短暂不可用时只记录告警，避免定时任务因异常刷屏或中断
+            log.warn("任务队列轮询失败: {}", e.getMessage());
         }
     }
 }
